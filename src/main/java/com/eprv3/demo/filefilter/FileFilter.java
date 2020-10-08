@@ -26,7 +26,7 @@ public class FileFilter {
 
 
                     if (StringUtils.isBlank(id)) {
-                        log.info("Associate ID is missing for " + a.getFirstNm() + " " + a.getLastNm() + ". " + fileName + " " + timestamp + ".");
+                        log.error("Associate ID is missing for " + a.getFirstNm() + " " + a.getLastNm() + ". " + fileName + " " + timestamp + ".");
                         return;
                     }
 
@@ -42,25 +42,15 @@ public class FileFilter {
                         return;
                     }
 
-                    ////////checks for employee level id
-                    if (StringUtils.isBlank(a.getEmployeeLevelId())) {
-                        log.error("Employee level ID field is empty for employee " + id + ". " + fileName + " " + timestamp + ".");
-                        return;
-                    }
-
-                    if (!StringUtils.isBlank(a.getEmployeeLevelId()) || !(a.getEmployeeLevelId().matches("[0-9]+"))) {
-                        log.error("Employee level ID field is incorrectly formatted for associate  " + id + ". " + fileName + " " + timestamp + ".");
+                    if (StringUtils.isBlank(a.getEmployeeLevelId()) || !(a.getEmployeeLevelId().matches("[0-9]+"))) {
+                        log.error("Employee level ID field is incorrectly formatted for associate  " + id + " Employee level id: " + a.getEmployeeLevelId() + ". " + fileName + " " + timestamp + ".");
                         return;
                     }
 
                     ////////if employee status code not empty, adds rescinded to rescinded list and logs terminated
                     if (!StringUtils.isBlank(a.getEmpStatusCode())) {
-                        if (a.getEmpStatusCode().equals("D")) {
-                            rescindedList.add(a);
-                            return;
-                        }
                         if (a.getEmpStatusCode().equals("T")) {
-                            log.error("Employee " + id + "terminated. " + fileName + " " + timestamp + ".");
+                            log.error("Employee " + id + " terminated. " + fileName + " " + timestamp + ".");
                             return;
                         }
                     }
@@ -69,27 +59,29 @@ public class FileFilter {
                     if (!StringUtils.isBlank(a.getEmpStatusCode())) {
                         if (!StringUtils.isBlank(a.getLastDateWorked())) {
                             if ((a.getEmpStatusCode().equals("D"))) {
-                                log.error("Employee status code: " + a.getEmpStatusCode() + ". Last hire date: " + a.getLastHireDate() +
+                                log.error("Employee status code for associate " + id + ": " + a.getEmpStatusCode() + ". Last hire date: " + a.getLastHireDate() +
                                         " Last date worked: " + a.getLastDateWorked() + " Effective date: " + a.getEffectiveDt() +
                                         ". Job title: " + a.getJobCode() + ". " + fileName + " " + timestamp + ".");
+                                rescindedList.add(a);
                                 return;
                             }
                             if ((a.getEmpStatusCode().equals("I"))) {
-                                log.error("Employee status code: " + a.getEmpStatusCode() + ". Last hire date: " + a.getLastHireDate() +
+                                log.error("Employee status code for associate " + id + ": " + a.getEmpStatusCode() + ". Last hire date: " + a.getLastHireDate() +
                                         " Effective date: " + a.getEffectiveDt() + ". Job title: " + a.getJobCode() +
                                         ". Last date worked: " + a.getLastDateWorked() + ". " + fileName + " " + timestamp + ".");
                                 return;
-                            } else {
-                                log.error("Last date worked for associate " + id + "is " + a.getLastDateWorked() + ". " + fileName + " " + timestamp + ".");
-                                return;
                             }
+                            //else {
+                              //  log.error("Last date worked for associate " + id + "is " + a.getLastDateWorked() + ". " + fileName + " " + timestamp + ".");
+                                //return;
+                            //}
 
                         }
                     }
 
                     ////////Checks if manager id of associate's manager is missing.
                     if (StringUtils.isBlank(a.getManagerEmployeeId())) {
-                        log.error("Associate manager relationship for associate " + id + "incomplete. Manager associate ID missing. " + fileName + " " + timestamp + ".");
+                        log.error("Associate manager relationship for associate " + id + " incomplete. Manager associate ID missing. " + fileName + " " + timestamp + ".");
                     }
 
                     ////////Checks if manager id not missing but associate id is same as manager's id
@@ -105,6 +97,9 @@ public class FileFilter {
                         ////////If location type field empty, provides message
                         if (StringUtils.isBlank(a.getLocationType())) {
                             log.error("Location type field empty for associate " + id + ". " + fileName + " " + timestamp + ".");
+                        }
+                        if(!StringUtils.isBlank(a.getLocationType())) {
+                            log.error("Location type for associate " + id + " is " + a.getLocationType() + ".");
                         }
                     }
 
